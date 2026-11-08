@@ -15,6 +15,11 @@ COPY . .
 
 # Relativa: la misma imagen sirve en dev y en prod, bajo el mismo dominio que la API.
 ARG BACKEND_URL=/api
+# Auth0: Vite los graba en el JavaScript al construir. Son públicos (el Client ID de una SPA no es
+# un secreto) y todos los entornos usan el mismo tenant, así que una sola imagen sirve para todos.
+ARG VITE_AUTH0_DOMAIN=dev-m32ysp7h6y2qyjn0.us.auth0.com
+ARG VITE_AUTH0_CLIENT_ID=G0kbDLuLToHgld18uycoHvq7sav3xMvp
+ARG VITE_AUTH0_AUDIENCE=https://snippet-searcher-api
 RUN npm run build
 
 # Etapa 2: solo los archivos estáticos, servidos por nginx.
