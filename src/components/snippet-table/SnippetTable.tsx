@@ -1,7 +1,7 @@
 import {
+  alpha,
   Box,
   Button,
-  IconButton,
   InputBase,
   Menu,
   MenuItem,
@@ -75,56 +75,68 @@ export const SnippetTable = (props: SnippetTableProps) => {
 
   return (
       <>
-        <Box display="flex" flexDirection="row" justifyContent="space-between">
-          <Box sx={{background: 'white', width: '30%', display: 'flex'}}>
+        <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 2, justifyContent: 'space-between', alignItems: 'center'}}>
+          <Box sx={{
+            display: 'flex',
+            alignItems: 'center',
+            width: {xs: '100%', sm: 360},
+            bgcolor: 'background.paper',
+            border: 1,
+            borderColor: 'divider',
+            borderRadius: 1,
+            '&:focus-within': {
+              borderColor: 'primary.main',
+              boxShadow: (theme) => `0 0 0 3px ${alpha(theme.palette.primary.main, 0.15)}`,
+            },
+          }}>
+            <Search fontSize="small" sx={{ml: 1.5, color: 'text.secondary'}}/>
             <InputBase
-                sx={{ml: 1, flex: 1}}
-                placeholder="Search FileType"
-                inputProps={{'aria-label': 'search'}}
+                sx={{ml: 1, flex: 1, py: 0.75}}
+                placeholder="Search snippets by name"
+                inputProps={{'aria-label': 'Search snippets by name'}}
                 onChange={e => handleSearchSnippet(e.target.value)}
             />
-            <IconButton type="button" sx={{p: '10px'}} aria-label="search">
-              <Search/>
-            </IconButton>
           </Box>
-          <Button ref={popoverRef} variant="contained" disableRipple sx={{boxShadow: 0}}
+          <Button ref={popoverRef} variant="contained" startIcon={<Add/>}
                   onClick={() => setPopoverMenuOpened(true)}>
-            <Add/>
-            Add Snippet
+            Add snippet
           </Button>
         </Box>
-        <Table size="medium" sx={{borderSpacing: "0 10px", borderCollapse: "separate"}}>
-          <TableHead>
-            <TableRow sx={{fontWeight: 'bold'}}>
-              <StyledTableCell sx={{fontWeight: "bold"}}>Name</StyledTableCell>
-              <StyledTableCell sx={{fontWeight: "bold"}}>Language</StyledTableCell>
-              <StyledTableCell sx={{fontWeight: "bold"}}>Author</StyledTableCell>
-              <StyledTableCell sx={{fontWeight: "bold"}}>Conformance</StyledTableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>{
-            loading ? (
-                <>
-                  {Array.from({length: 10}).map((_, index) => (
-                      <LoadingSnippetRow key={index}/>
-                  ))}
-                </>
-            ) : (
-                <>
-                  {
-                      snippets && snippets.map((snippet) => (
-                          <SnippetRow data-testid={"snippet-row"}
-                                      onClick={() => handleClickSnippet(snippet.id)} key={snippet.id} snippet={snippet}/>
-                      ))
-                  }
-                </>
-            )
-          }
-          </TableBody>
-          <TablePagination count={count} page={page} rowsPerPage={pageSize}
-                           onPageChange={(_, page) => handleGoToPage(page)}
-                           onRowsPerPageChange={e => handleChangePageSize(Number(e.target.value))}/>
-        </Table>
+        {/* En pantallas chicas la tabla se desplaza de costado en vez de romper el diseño */}
+        <Box sx={{overflowX: 'auto'}}>
+          <Table size="medium" sx={{borderSpacing: "0 8px", borderCollapse: "separate", minWidth: 640}}>
+            <TableHead>
+              <TableRow>
+                <HeaderCell>Name</HeaderCell>
+                <HeaderCell>Language</HeaderCell>
+                <HeaderCell>Author</HeaderCell>
+                <HeaderCell>Conformance</HeaderCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>{
+              loading ? (
+                  <>
+                    {Array.from({length: 10}).map((_, index) => (
+                        <LoadingSnippetRow key={index}/>
+                    ))}
+                  </>
+              ) : (
+                  <>
+                    {
+                        snippets && snippets.map((snippet) => (
+                            <SnippetRow data-testid={"snippet-row"}
+                                        onClick={() => handleClickSnippet(snippet.id)} key={snippet.id} snippet={snippet}/>
+                        ))
+                    }
+                  </>
+              )
+            }
+            </TableBody>
+          </Table>
+        </Box>
+        <TablePagination component="div" count={count} page={page} rowsPerPage={pageSize}
+                         onPageChange={(_, page) => handleGoToPage(page)}
+                         onRowsPerPageChange={e => handleChangePageSize(Number(e.target.value))}/>
         <AddSnippetModal defaultSnippet={snippet} open={addModalOpened}
                          onClose={() => setAddModalOpened(false)}/>
         <Menu anchorEl={popoverRef.current} open={popoverMenuOpened} onClick={handleClickMenu}>
@@ -142,3 +154,10 @@ export const StyledTableCell = styled(TableCell)`
     border: 0;
     align-items: center;
 `
+
+const HeaderCell = styled(StyledTableCell)(({theme}) => ({
+  paddingBottom: 0,
+  color: theme.palette.text.secondary,
+  fontSize: '0.8125rem',
+  fontWeight: 600,
+}))
