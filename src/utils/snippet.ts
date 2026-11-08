@@ -10,8 +10,11 @@ export type ComplianceEnum =
 
 export type CreateSnippet = {
   name: string;
+  description: string;
   content: string;
   language: string;
+  // Versión del lenguaje: la API la necesita para validar (const, if y readInput existen desde la 1.1)
+  version: string;
   extension: string;
 }
 

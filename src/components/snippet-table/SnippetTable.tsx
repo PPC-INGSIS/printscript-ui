@@ -57,8 +57,11 @@ export const SnippetTable = (props: SnippetTableProps) => {
     file.text().then((text) => {
       setSnippet({
         name: splitName[0],
+        // El archivo no trae descripción ni versión: se eligen en el modal
+        description: "",
         content: text,
         language: fileType.language,
+        version: "",
         extension: fileType.extension
       })
     }).catch(e => {
