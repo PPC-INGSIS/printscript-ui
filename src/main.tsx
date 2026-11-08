@@ -5,6 +5,8 @@ import {createRoot} from "react-dom/client";
 import {PaginationProvider} from "./contexts/paginationProvider.tsx";
 import {SnackbarProvider} from "./contexts/snackbarProvider.tsx";
 import {Auth0Provider} from "@auth0/auth0-react";
+import {CssBaseline, ThemeProvider} from "@mui/material";
+import {theme} from "./theme.ts";
 
 createRoot(document.getElementById('root')!).render(
     <React.StrictMode>
@@ -19,11 +21,15 @@ createRoot(document.getElementById('root')!).render(
                 scope: "openid profile email read:snippets write:snippets",
             }}
         >
-            <PaginationProvider>
-                <SnackbarProvider>
-                    <App/>
-                </SnackbarProvider>
-            </PaginationProvider>
+            {/* Colores, tipografía y formas salen de un solo lugar: theme.ts */}
+            <ThemeProvider theme={theme}>
+                <CssBaseline/>
+                <PaginationProvider>
+                    <SnackbarProvider>
+                        <App/>
+                    </SnackbarProvider>
+                </PaginationProvider>
+            </ThemeProvider>
         </Auth0Provider>
     </React.StrictMode>,
 )

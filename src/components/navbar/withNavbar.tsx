@@ -1,14 +1,14 @@
 import {ComponentType} from "react";
 import {Navbar} from "./Navbar.tsx";
-import {Box} from "@mui/material";
+import {Container} from "@mui/material";
 
 export const withNavbar = (WrappedComponent: ComponentType<unknown>) => {
     return () => (
         <>
             <Navbar/>
-            <Box padding={"16px 128px"}>
+            <Container component="main" maxWidth="lg" sx={{py: {xs: 3, md: 5}}}>
                 <WrappedComponent/>
-            </Box>
+            </Container>
         </>
     );
 };
