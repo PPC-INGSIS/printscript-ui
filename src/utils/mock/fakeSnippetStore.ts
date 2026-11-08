@@ -10,28 +10,34 @@ const INITIAL_SNIPPETS: Snippet[] = [
   {
     id: '9af91631-cdfc-4341-9b8e-3694e5cb3672',
     name: 'Super Snippet',
+    description: 'Suma dos números',
     content: 'let a : number = 5;\nlet b : number = 5;\n\nprintln(a + b);',
     compliance: 'pending',
     author: 'John Doe',
     language: 'printscript',
+    version: '1.1',
     extension: 'prs'
   },
   {
     id: 'c48cf644-fbc1-4649-a8f4-9dd7110640d9',
     name: 'Extra cool Snippet',
+    description: 'Suma dos números, otra vez',
     content: 'let a : number = 5;\nlet b : number = 5;\n\nprintln(a + b);',
     compliance: 'not-compliant',
     author: 'John Doe',
     language: 'printscript',
+    version: '1.1',
     extension: 'prs'
   },
   {
     id: '34bf4b7a-d4a1-48be-bb26-7d9a3be46227',
     name: 'Boaring Snippet',
+    description: 'Una suma sin sorpresas',
     content: 'let a : number = 5;\nlet b : number = 5;\n\nprintln(a + b);',
     compliance: 'compliant',
     author: 'John Doe',
     language: 'printscript',
+    version: '1.1',
     extension: 'prs'
   }
 ]
@@ -142,18 +148,22 @@ const fileTypes: FileType[] = [
   {
     language: "printscript",
     extension: "prs",
+    versions: ["1.0", "1.1"],
   },
   {
     language: "python",
     extension: "py",
+    versions: ["3.12"],
   },
   {
     language: "java",
     extension: "java",
+    versions: ["21"],
   },
   {
     language: 'golang',
-    extension: 'go'
+    extension: 'go',
+    versions: ['1.23'],
   }
 ]
 
