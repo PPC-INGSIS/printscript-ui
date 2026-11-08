@@ -55,20 +55,25 @@ To start cypress, make sure that the UI is running and enter:
 npm run cypress
 ```
 
-## Enable Auth0
+## Auth0
 
-This application uses https://www.npmjs.com/package/@auth0/auth0-react library for Auth0 integration, to enable it you need to change:
-* Uncomment autologin in [App.tsx](src/App.tsx)
-* Uncomment token retrieval for operations [queries.tsx](src/utils/queries.tsx) 
-* Create a `.env` file with the required env vars:
+La UI exige login: `App.tsx` envuelve la app con `withAuthenticationRequired`, y `main.tsx` le pide a Auth0 un token para la API de Snippet Searcher (`audience`), con los permisos `read:snippets` y `write:snippets`.
+
+Los valores son públicos. La imagen de Docker los recibe como build args (ver el `Dockerfile`), así que la misma imagen sirve en todos los entornos. Para correr con `npm run dev`, crear un archivo `.env` (lo ignora git) con:
+
 ```
-VITE_AUTH0_DOMAIN=<domain>
-VITE_AUTH0_CLIENT_ID=<client_id>
+VITE_AUTH0_DOMAIN=dev-m32ysp7h6y2qyjn0.us.auth0.com
+VITE_AUTH0_CLIENT_ID=G0kbDLuLToHgld18uycoHvq7sav3xMvp
+VITE_AUTH0_AUDIENCE=https://snippet-searcher-api
 ```
 
-If you get 401 loop when getting token:
-* Change application type in Auth0 to "Regular Web Application"
-* In Application Settings > Credentials > "Authentication Method" select "None" 
+`http://localhost:5173` está registrada en Auth0 como callback permitida, así que en local hay que usar ese puerto.
+
+Pendiente: `src/utils/queries.tsx` usa `FakeSnippetOperations`. Cuando se implementen las operaciones reales, obtienen el token con `getAccessTokenSilently()` y lo mandan como `Authorization: Bearer <token>`.
+
+Si al pedir el token queda en un loop de 401:
+* Cambiar el tipo de aplicación en Auth0 a "Regular Web Application"
+* En Application Settings > Credentials > "Authentication Method", elegir "None"
 
 ## Start working
 

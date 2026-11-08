@@ -12,7 +12,11 @@ createRoot(document.getElementById('root')!).render(
             domain={import.meta.env.VITE_AUTH0_DOMAIN ?? ""}
             clientId={import.meta.env.VITE_AUTH0_CLIENT_ID ?? ""}
             authorizationParams={{
-                redirect_uri: window.location.origin
+                redirect_uri: window.location.origin,
+                // Para qué API es el token: sin esto Auth0 no emite un JWT que Snippets acepte
+                audience: import.meta.env.VITE_AUTH0_AUDIENCE ?? "",
+                // Permisos que pide la UI; por RBAC, Auth0 solo los da si el usuario tiene el rol
+                scope: "openid profile email read:snippets write:snippets",
             }}
         >
             <PaginationProvider>
