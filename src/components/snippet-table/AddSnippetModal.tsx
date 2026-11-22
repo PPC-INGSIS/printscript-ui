@@ -22,6 +22,7 @@ import {CreateSnippet, CreateSnippetWithLang} from "../../utils/snippet.ts";
 import {ModalWrapper} from "../common/ModalWrapper.tsx";
 import {useCreateSnippet, useGetFileTypes} from "../../utils/queries.tsx";
 import {queryClient} from "../../App.tsx";
+import {useSnackbarContext} from "../../contexts/snackbarContext.tsx";
 
 export const AddSnippetModal = ({open, onClose, defaultSnippet}: {
     open: boolean,
@@ -38,6 +39,7 @@ export const AddSnippetModal = ({open, onClose, defaultSnippet}: {
         onSuccess: () => queryClient.invalidateQueries('listSnippets')
     })
     const {data: fileTypes} = useGetFileTypes();
+    const {createSnackbar} = useSnackbarContext()
     const versions = fileTypes?.find((f) => f.language === language)?.versions ?? [];
 
     // Cada lenguaje tiene sus versiones: al cambiar de lenguaje, la versión elegida deja de valer
@@ -55,8 +57,13 @@ export const AddSnippetModal = ({open, onClose, defaultSnippet}: {
             version: version,
             extension: fileTypes?.find((f) => f.language === language)?.extension ?? "prs"
         }
-        await createSnippet(newSnippet);
-        onClose();
+        try {
+            await createSnippet(newSnippet);
+            onClose();
+        } catch (error) {
+            // El modal queda abierto para que el usuario corrija el código y vuelva a guardar
+            createSnackbar('error', error instanceof Error ? error.message : "Could not create the snippet")
+        }
     }
 
     useEffect(() => {

@@ -3,27 +3,22 @@ import {CreateSnippet, PaginatedSnippets, Snippet, UpdateSnippet} from './snippe
 import {SnippetOperations} from "./snippetOperations.ts";
 import {PaginatedUsers} from "./users.ts";
 import {FakeSnippetOperations} from "./mock/fakeSnippetOperations.ts";
+import {ApiSnippetOperations} from "./api/apiSnippetOperations.ts";
 import {TestCase} from "../types/TestCase.ts";
 import {FileType} from "../types/FileType.ts";
 import {Rule} from "../types/Rule.ts";
-// import {useAuth0} from "@auth0/auth0-react";
-// import {useEffect} from "react";
+import {useAuth0} from "@auth0/auth0-react";
+import {useMemo} from "react";
 
 
 export const useSnippetsOperations = () => {
-  // const {getAccessTokenSilently} = useAuth0()
-  //
-  // useEffect(() => {
-  //     getAccessTokenSilently()
-  //         .then(token => {
-  //             console.log(token)
-  //         })
-  //         .catch(error => console.error(error));
-  // });
+  const {getAccessTokenSilently} = useAuth0()
 
-  const snippetOperations: SnippetOperations = new FakeSnippetOperations(/* getAccessTokenSilently */); // TODO: Replace with your implementation
-
-  return snippetOperations
+  // Una sola instancia mientras no cambie la función del token (y con ella, un solo store falso)
+  return useMemo<SnippetOperations>(
+      () => new ApiSnippetOperations(() => getAccessTokenSilently(), new FakeSnippetOperations()),
+      [getAccessTokenSilently]
+  )
 }
 
 export const useGetSnippets = (page: number = 0, pageSize: number = 10, snippetName?: string) => {
