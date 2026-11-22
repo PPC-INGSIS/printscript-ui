@@ -69,11 +69,20 @@ VITE_AUTH0_AUDIENCE=https://snippet-searcher-api
 
 `http://localhost:5173` está registrada en Auth0 como callback permitida, así que en local hay que usar ese puerto.
 
-Pendiente: `src/utils/queries.tsx` usa `FakeSnippetOperations`. Cuando se implementen las operaciones reales, obtienen el token con `getAccessTokenSilently()` y lo mandan como `Authorization: Bearer <token>`.
+Las llamadas a la API llevan ese token: ver [API](#api).
 
 Si al pedir el token queda en un loop de 401:
 * Cambiar el tipo de aplicación en Auth0 a "Regular Web Application"
 * En Application Settings > Credentials > "Authentication Method", elegir "None"
+
+## API
+
+`src/utils/queries.tsx` usa `ApiSnippetOperations` (`src/utils/api/`), que le habla a Snippets por HTTP con el token de Auth0 (`Authorization: Bearer <token>`).
+
+- Por ahora solo `createSnippet` va a la API. Las demás operaciones siguen con `FakeSnippetOperations` hasta que exista su endpoint, y cada ticket conecta la suya en `ApiSnippetOperations`. Por eso un snippet creado todavía no aparece en la tabla: listar sigue siendo falso.
+- La UI le pide a `/api`, una ruta relativa. En la VM lo atiende nginx; con `npm run dev`, el proxy de Vite lo manda a `http://127.0.0.1:8080` y le saca el `/api`. Si Snippets corre en otro lado, poné `API_PROXY_TARGET` en el `.env`.
+- Para probar en local hacen falta Snippets en el `8080` y PrintScript en el `8082`, con su base y Redis.
+- Si la API responde 400, el modal de crear muestra los errores de PrintScript (línea, columna y motivo) y queda abierto para corregir.
 
 ## Start working
 
