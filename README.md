@@ -84,6 +84,15 @@ Si al pedir el token queda en un loop de 401:
 - Para probar en local hacen falta Snippets en el `8080` y PrintScript en el `8082`, con su base y Redis.
 - Si la API responde 400, el modal de crear muestra los errores de PrintScript (línea, columna y motivo) y queda abierto para corregir.
 
+## New Relic
+
+`src/observability/newRelic.ts` arranca el agente de navegador de New Relic (paquete `@newrelic/browser-agent`) antes de montar React. Mide las cargas de página, los errores de JavaScript y las llamadas a `/api` vistas desde el navegador, y les agrega `traceparent` para unirlas con el agente de Snippets.
+
+- La app de browser en New Relic es una sola para dev y prod (la imagen es la misma). Se separan por la URL de la página.
+- Los valores son públicos y entran como build args (ver el `Dockerfile`): `VITE_NEW_RELIC_ACCOUNT_ID`, `VITE_NEW_RELIC_TRUST_KEY`, `VITE_NEW_RELIC_APPLICATION_ID` y `VITE_NEW_RELIC_BROWSER_KEY`. Salen del bloque *Copy/Paste JavaScript* de la app, en *Browser → snippet-searcher-ui → Application settings*.
+- La browser key empieza con `NRJS-` y solo sirve para mandar datos de navegador. La license key de los agentes del backend es secreta y nunca va en la UI: todo lo que entra en el build lo puede leer cualquiera que abra la página.
+- Si falta alguno de los cuatro valores, el agente no arranca. Con `npm run dev` y en el build del CI no se manda nada.
+
 ## Start working
 
 1. Fork the Project

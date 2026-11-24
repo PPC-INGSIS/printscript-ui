@@ -7,6 +7,10 @@ import {SnackbarProvider} from "./contexts/snackbarProvider.tsx";
 import {Auth0Provider} from "@auth0/auth0-react";
 import {CssBaseline, ThemeProvider} from "@mui/material";
 import {theme} from "./theme.ts";
+import {startNewRelic} from "./observability/newRelic.ts";
+
+// Antes de montar React, para que el agente mida la carga completa y vea los errores desde el principio
+startNewRelic()
 
 createRoot(document.getElementById('root')!).render(
     <React.StrictMode>
