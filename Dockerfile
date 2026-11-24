@@ -20,6 +20,12 @@ ARG BACKEND_URL=/api
 ARG VITE_AUTH0_DOMAIN=dev-m32ysp7h6y2qyjn0.us.auth0.com
 ARG VITE_AUTH0_CLIENT_ID=G0kbDLuLToHgld18uycoHvq7sav3xMvp
 ARG VITE_AUTH0_AUDIENCE=https://snippet-searcher-api
+# New Relic (agente de navegador): también públicos. La browser key empieza con NRJS- y solo sirve para
+# mandar datos de navegador; la license key de los agentes del backend nunca va acá.
+ARG VITE_NEW_RELIC_ACCOUNT_ID=8721261
+ARG VITE_NEW_RELIC_TRUST_KEY=8721261
+ARG VITE_NEW_RELIC_APPLICATION_ID=601695389
+ARG VITE_NEW_RELIC_BROWSER_KEY=NRJS-d39e884c1ae09640f9a
 RUN npm run build
 
 # Etapa 2: solo los archivos estáticos, servidos por nginx.
