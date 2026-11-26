@@ -1,7 +1,15 @@
 import {Box, Modal} from "@mui/material";
 import {ReactNode} from "react";
 
-export const ModalWrapper = ({open, onClose,children}: { open: boolean, onClose: () => void, children: ReactNode }) => {
+type ModalWrapperProps = {
+  open: boolean
+  onClose: () => void
+  children: ReactNode
+  // Para los modales chicos (una pregunta y dos botones): sin esto ocupan la mitad de la pantalla
+  maxWidth?: number
+}
+
+export const ModalWrapper = ({open, onClose, children, maxWidth}: ModalWrapperProps) => {
   return (
       <Modal
           open={open}
@@ -14,7 +22,7 @@ export const ModalWrapper = ({open, onClose,children}: { open: boolean, onClose:
           backgroundColor: 'white',
           padding: '32px',
           borderRadius: '8px',
-          width: '50%',
+          width: maxWidth ? `min(${maxWidth}px, calc(100% - 32px))` : '50%',
           display: 'flex',
           flexDirection: 'column',
           gap: '16px'

@@ -160,8 +160,14 @@ export class ApiSnippetOperations implements SnippetOperations {
         return this.fallback.removeTestCase(id)
     }
 
-    deleteSnippet(id: string): Promise<string> {
-        return this.fallback.deleteSnippet(id)
+    async deleteSnippet(id: string): Promise<string> {
+        try {
+            // 204 sin cuerpo: se devuelve el id, que es lo que promete la firma
+            await this.http.delete(`/snippets/${encodeURIComponent(id)}`)
+            return id
+        } catch (error) {
+            throw toError(error)
+        }
     }
 
     testSnippet(testCase: Partial<TestCase>): Promise<TestCaseResult> {
