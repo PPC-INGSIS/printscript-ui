@@ -3,8 +3,10 @@ import {TestCase} from "../../types/TestCase.ts";
 import {Autocomplete, Box, Button, Chip, TextField, Typography} from "@mui/material";
 import {BugReport, Delete, Save} from "@mui/icons-material";
 import {useTestSnippet} from "../../utils/queries.tsx";
+import {useSnackbarContext} from "../../contexts/snackbarContext.tsx";
 
 type TabPanelProps = {
+    snippetId: string;
     index: number;
     value: number;
     test?: TestCase;
@@ -12,10 +14,11 @@ type TabPanelProps = {
     removeTestCase?: (testIndex: string) => void;
 }
 
-export const TabPanel = ({value, index, test: initialTest, setTestCase, removeTestCase}: TabPanelProps) => {
+export const TabPanel = ({snippetId, value, index, test: initialTest, setTestCase, removeTestCase}: TabPanelProps) => {
     const [testData, setTestData] = useState<Partial<TestCase> | undefined>(initialTest);
 
-    const {mutateAsync: testSnippet, data} = useTestSnippet();
+    const {mutate: testSnippet, data, isLoading: isTesting} = useTestSnippet(snippetId);
+    const {createSnackbar} = useSnackbarContext()
 
 
     return (
@@ -88,8 +91,8 @@ export const TabPanel = ({value, index, test: initialTest, setTestCase, removeTe
                         <Button disabled={!testData?.name} onClick={() => setTestCase(testData ?? {})} variant={"outlined"} startIcon={<Save/>}>
                             Save
                         </Button>
-                        <Button onClick={() => testSnippet(testData ?? {})} variant={"contained"} startIcon={<BugReport/>}
-                                disableElevation>
+                        <Button onClick={() => testSnippet(testData ?? {}, {onError: (error) => createSnackbar('error', error.message)})}
+                                variant={"contained"} startIcon={<BugReport/>} disabled={isTesting} disableElevation>
                             Test
                         </Button>
                         {data && (data === "success" ? <Chip label="Pass" color="success"/> :

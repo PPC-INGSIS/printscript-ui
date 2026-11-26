@@ -69,41 +69,38 @@ export const useShareSnippet = () => {
 };
 
 
-export const useGetTestCases = () => {
+// La clave lleva el snippet: sin él, los tests de un snippet quedarían en caché para el siguiente
+export const useGetTestCases = (snippetId: string) => {
   const snippetOperations = useSnippetsOperations()
 
-  return useQuery<TestCase[] | undefined, Error>(['testCases'], () => snippetOperations.getTestCases(), {});
+  return useQuery<TestCase[] | undefined, Error>(['testCases', snippetId], () => snippetOperations.getTestCases(snippetId));
 };
 
 
-export const usePostTestCase = () => {
+export const usePostTestCase = (snippetId: string) => {
   const snippetOperations = useSnippetsOperations()
 
   return useMutation<TestCase, Error, Partial<TestCase>>(
-      (tc) => snippetOperations.postTestCase(tc)
+      (tc) => snippetOperations.postTestCase(snippetId, tc)
   );
 };
 
 
-export const useRemoveTestCase = ({onSuccess}: {onSuccess: () => void}) => {
+export const useRemoveTestCase = (snippetId: string) => {
   const snippetOperations = useSnippetsOperations()
 
   return useMutation<string, Error, string>(
-      ['removeTestCase'],
-      (id) => snippetOperations.removeTestCase(id),
-      {
-        onSuccess,
-      }
+      (id) => snippetOperations.removeTestCase(snippetId, id)
   );
 };
 
 export type TestCaseResult = "success" | "fail"
 
-export const useTestSnippet = () => {
+export const useTestSnippet = (snippetId: string) => {
   const snippetOperations = useSnippetsOperations()
 
   return useMutation<TestCaseResult, Error, Partial<TestCase>>(
-      (tc) => snippetOperations.testSnippet(tc)
+      (tc) => snippetOperations.testSnippet(snippetId, tc)
   )
 }
 

@@ -35,6 +35,18 @@ type PaginatedSnippetsResponse = {
     snippets: SnippetResponse[];
 }
 
+// Lo que devuelve POST /snippets/{id}/tests/run. `outputs` y `expected` todavía no se muestran:
+// la UI solo dice si pasó
+type RunTestResponse = {
+    passed: boolean;
+    outputs: string[];
+    expected: string[];
+    error?: string | null;
+}
+
+// Los tests cuelgan del snippet: /snippets/{id}/tests
+const testsPath = (snippetId: string): string => `/snippets/${encodeURIComponent(snippetId)}/tests`
+
 // Snippets responde 400 con los errores de PrintScript o con un motivo, y 502 con un motivo.
 // Algunos 400 y 502 vienen en formato Problem Details (RFC 9457), con el motivo en `detail`
 type ApiErrorBody = {
@@ -161,20 +173,42 @@ export class ApiSnippetOperations implements SnippetOperations {
         return this.fallback.getLintingRules()
     }
 
-    getTestCases(): Promise<TestCase[]> {
-        return this.fallback.getTestCases()
+    // GET /snippets/{id}/tests devuelve los campos con los mismos nombres que TestCase
+    async getTestCases(snippetId: string): Promise<TestCase[]> {
+        try {
+            const {data} = await this.http.get<TestCase[]>(testsPath(snippetId))
+            return data
+        } catch (error) {
+            throw toError(error)
+        }
     }
 
     formatSnippet(snippet: string): Promise<string> {
         return this.fallback.formatSnippet(snippet)
     }
 
-    postTestCase(testCase: Partial<TestCase>): Promise<TestCase> {
-        return this.fallback.postTestCase(testCase)
+    // Sin id es un test nuevo (POST); con id, uno guardado que se edita (PUT)
+    async postTestCase(snippetId: string, testCase: Partial<TestCase>): Promise<TestCase> {
+        const {id, name, input, output} = testCase
+        const body = {name, input: input ?? [], output: output ?? []}
+        try {
+            const {data} = id
+                ? await this.http.put<TestCase>(`${testsPath(snippetId)}/${encodeURIComponent(id)}`, body)
+                : await this.http.post<TestCase>(testsPath(snippetId), body)
+            return data
+        } catch (error) {
+            throw toError(error)
+        }
     }
 
-    removeTestCase(id: string): Promise<string> {
-        return this.fallback.removeTestCase(id)
+    async removeTestCase(snippetId: string, id: string): Promise<string> {
+        try {
+            // 204 sin cuerpo: se devuelve el id, igual que deleteSnippet
+            await this.http.delete(`${testsPath(snippetId)}/${encodeURIComponent(id)}`)
+            return id
+        } catch (error) {
+            throw toError(error)
+        }
     }
 
     async deleteSnippet(id: string): Promise<string> {
@@ -187,8 +221,18 @@ export class ApiSnippetOperations implements SnippetOperations {
         }
     }
 
-    testSnippet(testCase: Partial<TestCase>): Promise<TestCaseResult> {
-        return this.fallback.testSnippet(testCase)
+    // Se manda el formulario tal como está, guardado o no: el botón Test no guarda
+    async testSnippet(snippetId: string, testCase: Partial<TestCase>): Promise<TestCaseResult> {
+        const {input, output} = testCase
+        try {
+            const {data} = await this.http.post<RunTestResponse>(`${testsPath(snippetId)}/run`, {
+                input: input ?? [],
+                output: output ?? [],
+            })
+            return data.passed ? "success" : "fail"
+        } catch (error) {
+            throw toError(error)
+        }
     }
 
     modifyFormatRule(newRules: Rule[]): Promise<Rule[]> {
