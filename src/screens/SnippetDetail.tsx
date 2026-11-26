@@ -15,6 +15,7 @@ import {BugReport, Delete, Download, Save, Share} from "@mui/icons-material";
 import {ShareSnippetModal} from "../components/snippet-detail/ShareSnippetModal.tsx";
 import {TestSnippetModal} from "../components/snippet-test/TestSnippetModal.tsx";
 import {Snippet} from "../utils/snippet.ts";
+import {User} from "../utils/users.ts";
 import {SnippetExecution} from "./SnippetExecution.tsx";
 import ReadMoreIcon from '@mui/icons-material/ReadMore';
 import {queryClient} from "../App.tsx";
@@ -87,9 +88,14 @@ export const SnippetDetail = (props: SnippetDetailProps) => {
   }, [formatSnippetData])
 
 
-  async function handleShareSnippet(userId: string) {
-    shareSnippet({snippetId: id, userId})
-  }
+  const handleShareSnippet = (user: User) =>
+    shareSnippet({snippetId: id, userId: user.id}, {
+      onSuccess: () => {
+        setShareModalOppened(false)
+        createSnackbar('success', `Shared with ${user.name}`)
+      },
+      onError: (error) => createSnackbar('error', error.message),
+    })
 
   return (
       <Box p={4} minWidth={'60vw'}>
@@ -160,7 +166,7 @@ export const SnippetDetail = (props: SnippetDetailProps) => {
         }
         <ShareSnippetModal loading={loadingShare || isLoading} open={shareModalOppened}
                            onClose={() => setShareModalOppened(false)}
-                           onShare={handleShareSnippet}/>
+                           onShare={handleShareSnippet} snippetName={snippet?.name ?? ""}/>
         <TestSnippetModal open={testModalOpened} onClose={() => setTestModalOpened(false)}/>
         <DeleteConfirmationModal open={deleteConfirmationModalOpen} onClose={() => setDeleteConfirmationModalOpen(false)} id={snippet?.id ?? ""} name={snippet?.name ?? ""} setCloseDetails={handleCloseModal} />
       </Box>

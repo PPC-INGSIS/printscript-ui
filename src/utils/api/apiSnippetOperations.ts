@@ -128,12 +128,29 @@ export class ApiSnippetOperations implements SnippetOperations {
         return {...snippet, content, extension, compliance: "pending", author: ""}
     }
 
-    getUserFriends(name?: string, page?: number, pageSize?: number): Promise<PaginatedUsers> {
-        return this.fallback.getUserFriends(name, page, pageSize)
+    async getUserFriends(name: string = "", page: number = 0, pageSize: number = 10): Promise<PaginatedUsers> {
+        try {
+            // Snippets responde con la forma de PaginatedUsers: page arranca en 0 y page_size en snake_case
+            const {data} = await this.http.get<PaginatedUsers>(
+                `/users?name=${encodeURIComponent(name)}&${paginationParams(page, pageSize)}`,
+            )
+            return data
+        } catch (error) {
+            throw toError(error)
+        }
     }
 
-    shareSnippet(snippetId: string, userId: string): Promise<Snippet> {
-        return this.fallback.shareSnippet(snippetId, userId)
+    async shareSnippet(snippetId: string, userId: string): Promise<Snippet> {
+        try {
+            const {data} = await this.http.post<SnippetResponse>(
+                `/snippets/${encodeURIComponent(snippetId)}/share`,
+                {userId},
+            )
+            // La respuesta no trae el contenido: quien lo necesite lo vuelve a pedir con getSnippetById
+            return this.toSnippet(data, "")
+        } catch (error) {
+            throw toError(error)
+        }
     }
 
     getFormatRules(): Promise<Rule[]> {
