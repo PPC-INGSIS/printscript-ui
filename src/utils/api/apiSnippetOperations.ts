@@ -35,15 +35,6 @@ type PaginatedSnippetsResponse = {
     snippets: SnippetResponse[];
 }
 
-// Lo que devuelve POST /snippets/{id}/tests/run. `outputs` y `expected` todavía no se muestran:
-// la UI solo dice si pasó
-type RunTestResponse = {
-    passed: boolean;
-    outputs: string[];
-    expected: string[];
-    error?: string | null;
-}
-
 // Los tests cuelgan del snippet: /snippets/{id}/tests
 const testsPath = (snippetId: string): string => `/snippets/${encodeURIComponent(snippetId)}/tests`
 
@@ -221,15 +212,16 @@ export class ApiSnippetOperations implements SnippetOperations {
         }
     }
 
-    // Se manda el formulario tal como está, guardado o no: el botón Test no guarda
+    // Se manda el formulario tal como está, guardado o no: correr no guarda.
+    // La respuesta de POST /snippets/{id}/tests/run tiene la misma forma que TestCaseResult
     async testSnippet(snippetId: string, testCase: Partial<TestCase>): Promise<TestCaseResult> {
         const {input, output} = testCase
         try {
-            const {data} = await this.http.post<RunTestResponse>(`${testsPath(snippetId)}/run`, {
+            const {data} = await this.http.post<TestCaseResult>(`${testsPath(snippetId)}/run`, {
                 input: input ?? [],
                 output: output ?? [],
             })
-            return data.passed ? "success" : "fail"
+            return data
         } catch (error) {
             throw toError(error)
         }
