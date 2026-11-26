@@ -20,8 +20,13 @@ export type CreateSnippet = {
 
 export type CreateSnippetWithLang = CreateSnippet & { language: string }
 
+// El PUT de Snippets reemplaza el snippet entero: manda todos los datos, no solo el contenido
 export type UpdateSnippet = {
-  content: string
+  name: string;
+  description: string;
+  language: string;
+  version: string;
+  content: string;
 }
 
 export type Snippet = CreateSnippet & {
