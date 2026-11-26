@@ -143,13 +143,14 @@ export const SnippetDetail = (props: SnippetDetailProps) => {
               </Tooltip>
             </Box>
             <Box display={"flex"} gap={2}>
-              <Bòx flex={1} height={"fit-content"} overflow={"none"} minHeight={"500px"} bgcolor={'black'} color={'white'} code={code}>
+              {/* minWidth 0: un hijo de flex no se achica por debajo de su línea más larga. Sin esto, una
+                  línea sin espacios (miles de paréntesis) estiraba la caja y la página a cientos de miles de px */}
+              <Bòx flex={1} minWidth={0} height={"fit-content"} overflow={"none"} minHeight={"500px"} bgcolor={'black'} color={'white'} code={code}>
                 <Editor
                     value={code}
                     padding={10}
                     onValueChange={(code) => setCode(code)}
                     highlight={(code) => highlight(code, languages.js, "javascript")}
-                    maxLength={1000}
                     style={{
                       minHeight: "500px",
                       fontFamily: "monospace",
