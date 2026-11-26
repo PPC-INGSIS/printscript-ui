@@ -19,6 +19,7 @@ import {SnippetExecution} from "./SnippetExecution.tsx";
 import ReadMoreIcon from '@mui/icons-material/ReadMore';
 import {queryClient} from "../App.tsx";
 import {DeleteConfirmationModal} from "../components/snippet-detail/DeleteConfirmationModal.tsx";
+import {useSnackbarContext} from "../contexts/snackbarContext.tsx";
 
 type SnippetDetailProps = {
   id: string;
@@ -61,6 +62,17 @@ export const SnippetDetail = (props: SnippetDetailProps) => {
   const {mutate: shareSnippet, isLoading: loadingShare} = useShareSnippet()
   const {mutate: formatSnippet, isLoading: isFormatLoading, data: formatSnippetData} = useFormatSnippet()
   const {mutate: updateSnippet, isLoading: isUpdateSnippetLoading} = useUpdateSnippetById({onSuccess: () => queryClient.invalidateQueries(['snippet', id])})
+  const {createSnackbar} = useSnackbarContext()
+
+  // El editor solo cambia el código: el resto de los datos viajan como están, porque el PUT los pide todos
+  const saveChanges = () => {
+    if (!snippet) return
+    const {name, description, language, version} = snippet
+    updateSnippet(
+      {id, updateSnippet: {name, description, language, version, content: code}},
+      {onError: (error) => createSnackbar('error', error.message)},
+    )
+  }
 
   useEffect(() => {
     if (snippet) {
@@ -114,7 +126,7 @@ export const SnippetDetail = (props: SnippetDetailProps) => {
                 </IconButton>
               </Tooltip>
               <Tooltip title={"Save changes"}>
-                <IconButton color={"primary"} onClick={() => updateSnippet({id: id, updateSnippet: {content: code}})} disabled={isUpdateSnippetLoading || snippet?.content === code} >
+                <IconButton color={"primary"} onClick={saveChanges} disabled={isUpdateSnippetLoading || snippet?.content === code} >
                   <Save />
                 </IconButton>
               </Tooltip>
