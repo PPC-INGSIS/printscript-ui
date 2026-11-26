@@ -263,8 +263,11 @@ export class FakeSnippetStore {
     return id
   }
 
-  testSnippet(): TestCaseResult {
-    return Math.random() > 0.5 ? "success" : "fail"
+  // Sin ejecutar nada: pasa o falla al azar, y "imprime" lo esperado o una línea de más
+  testSnippet(testCase: Partial<TestCase>): TestCaseResult {
+    const expected = testCase.output ?? []
+    const passed = Math.random() > 0.5
+    return {passed, expected, outputs: passed ? expected : [...expected, "extra line"], error: null}
   }
 
   getFileTypes(): FileType[] {

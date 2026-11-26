@@ -94,7 +94,14 @@ export const useRemoveTestCase = (snippetId: string) => {
   );
 };
 
-export type TestCaseResult = "success" | "fail"
+// Lo que devuelve correr un test: si pasó, lo que imprimió el snippet y lo que el test esperaba.
+// `error` solo viene si el snippet se cortó antes de terminar
+export type TestCaseResult = {
+  passed: boolean
+  outputs: string[]
+  expected: string[]
+  error?: string | null
+}
 
 export const useTestSnippet = (snippetId: string) => {
   const snippetOperations = useSnippetsOperations()
