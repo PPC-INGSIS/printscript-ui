@@ -47,10 +47,14 @@ type RunTestResponse = {
 // Los tests cuelgan del snippet: /snippets/{id}/tests
 const testsPath = (snippetId: string): string => `/snippets/${encodeURIComponent(snippetId)}/tests`
 
+// Un error del código del usuario, como lo devuelve PrintScript. Sin posición cuando no hay una
+// línea que señalar, como el código con demasiado anidamiento
+type CodeError = { message: string; line: number | null; column: number | null }
+
 // Snippets responde 400 con los errores de PrintScript o con un motivo, y 502 con un motivo.
 // Algunos 400 y 502 vienen en formato Problem Details (RFC 9457), con el motivo en `detail`
 type ApiErrorBody = {
-    errors?: { message: string; line: number; column: number }[];
+    errors?: CodeError[];
     message?: string;
     detail?: string;
 }
@@ -244,6 +248,10 @@ export class ApiSnippetOperations implements SnippetOperations {
     }
 }
 
+// Con posición: "Line 1, column 15: ...". Sin posición, solo el mensaje
+const formatCodeError = (e: CodeError): string =>
+    e.line == null ? e.message : `Line ${e.line}, column ${e.column}: ${e.message}`
+
 // Convierte la respuesta de error de la API en un mensaje que se puede mostrar al usuario
 const toError = (error: unknown): Error => {
     if (!axios.isAxiosError<ApiErrorBody>(error)) {
@@ -251,7 +259,7 @@ const toError = (error: unknown): Error => {
     }
     const body = error.response?.data
     if (body?.errors?.length) {
-        return new Error(body.errors.map(e => `Line ${e.line}, column ${e.column}: ${e.message}`).join("; "))
+        return new Error(body.errors.map(formatCodeError).join("; "))
     }
     if (body?.message) {
         return new Error(body.message)
