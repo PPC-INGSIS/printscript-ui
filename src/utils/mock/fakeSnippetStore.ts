@@ -14,6 +14,7 @@ const INITIAL_SNIPPETS: Snippet[] = [
     content: 'let a : number = 5;\nlet b : number = 5;\n\nprintln(a + b);',
     compliance: 'pending',
     author: 'John Doe',
+    owned: true,
     language: 'printscript',
     version: '1.1',
     extension: 'prs'
@@ -24,7 +25,9 @@ const INITIAL_SNIPPETS: Snippet[] = [
     description: 'Suma dos números, otra vez',
     content: 'let a : number = 5;\nlet b : number = 5;\n\nprintln(a + b);',
     compliance: 'not-compliant',
-    author: 'John Doe',
+    // Uno compartido, para ver la pantalla de solo lectura sin backend
+    author: 'Jane Doe',
+    owned: false,
     language: 'printscript',
     version: '1.1',
     extension: 'prs'
@@ -36,6 +39,7 @@ const INITIAL_SNIPPETS: Snippet[] = [
     content: 'let a : number = 5;\nlet b : number = 5;\n\nprintln(a + b);',
     compliance: 'compliant',
     author: 'John Doe',
+    owned: true,
     language: 'printscript',
     version: '1.1',
     extension: 'prs'
@@ -195,6 +199,7 @@ export class FakeSnippetStore {
       id,
       compliance: 'compliant' as ComplianceEnum,
       author: 'yo',
+      owned: true,
       ...createSnippet
     }
     this.snippetMap.set(id, newSnippet)
