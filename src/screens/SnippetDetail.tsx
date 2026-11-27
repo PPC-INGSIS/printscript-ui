@@ -64,6 +64,8 @@ export const SnippetDetail = (props: SnippetDetailProps) => {
   const {mutate: formatSnippet, isLoading: isFormatLoading, data: formatSnippetData} = useFormatSnippet()
   const {mutate: updateSnippet, isLoading: isUpdateSnippetLoading} = useUpdateSnippetById({onSuccess: () => queryClient.invalidateQueries(['snippet', id])})
   const {createSnackbar} = useSnackbarContext()
+  // Mientras no cargó, nada de acciones del dueño: es mejor que aparezcan un instante tarde que ofrecer algo que da 404
+  const owned = snippet?.owned ?? false
 
   // El editor solo cambia el código: el resto de los datos viajan como están, porque el PUT los pide todos
   const saveChanges = () => {
@@ -108,33 +110,42 @@ export const SnippetDetail = (props: SnippetDetailProps) => {
             <CircularProgress/>
           </>) : <>
             <Typography variant="h4" fontWeight={"bold"}>{snippet?.name ?? "Snippet"}</Typography>
+            {snippet && !owned && (
+              <Typography variant="body2" color="text.secondary" mt={1}>
+                Shared with you by {snippet.author}. Only the owner can edit, share or delete it.
+              </Typography>
+            )}
             <Box display="flex" flexDirection="row" gap="8px" padding="8px">
-              <Tooltip title={"Share"}>
-                <IconButton onClick={() => setShareModalOppened(true)}>
-                  <Share/>
-                </IconButton>
-              </Tooltip>
+              {owned && (
+                <Tooltip title={"Share"}>
+                  <IconButton onClick={() => setShareModalOppened(true)}>
+                    <Share/>
+                  </IconButton>
+                </Tooltip>
+              )}
               <Tooltip title={"Test"}>
                 <IconButton onClick={() => setTestModalOpened(true)}>
                   <BugReport/>
                 </IconButton>
               </Tooltip>
               <DownloadButton snippet={snippet}/>
-              <Tooltip title={"Format"}>
-                <IconButton onClick={() => formatSnippet(code)} disabled={isFormatLoading}>
-                  <ReadMoreIcon />
-                </IconButton>
-              </Tooltip>
-              <Tooltip title={"Save changes"}>
-                <IconButton color={"primary"} onClick={saveChanges} disabled={isUpdateSnippetLoading || snippet?.content === code} >
-                  <Save />
-                </IconButton>
-              </Tooltip>
-              <Tooltip title={"Delete"}>
-                <IconButton onClick={() => setDeleteConfirmationModalOpen(true)} >
-                  <Delete color={"error"} />
-                </IconButton>
-              </Tooltip>
+              {owned && (<>
+                <Tooltip title={"Format"}>
+                  <IconButton onClick={() => formatSnippet(code)} disabled={isFormatLoading}>
+                    <ReadMoreIcon />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title={"Save changes"}>
+                  <IconButton color={"primary"} onClick={saveChanges} disabled={isUpdateSnippetLoading || snippet?.content === code} >
+                    <Save />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title={"Delete"}>
+                  <IconButton onClick={() => setDeleteConfirmationModalOpen(true)} >
+                    <Delete color={"error"} />
+                  </IconButton>
+                </Tooltip>
+              </>)}
             </Box>
             <Box display={"flex"} gap={2}>
               {/* minWidth 0: un hijo de flex no se achica por debajo de su línea más larga. Sin esto, una
@@ -143,6 +154,8 @@ export const SnippetDetail = (props: SnippetDetailProps) => {
                 <Editor
                     value={code}
                     padding={10}
+                    // Lo compartido se lee: si se pudiera escribir, el usuario editaría algo que no puede guardar
+                    readOnly={!owned}
                     onValueChange={(code) => setCode(code)}
                     highlight={(code) => highlight(code, languages.js, "javascript")}
                     style={{

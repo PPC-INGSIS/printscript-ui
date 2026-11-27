@@ -20,6 +20,8 @@ type SnippetResponse = {
     description: string;
     language: string;
     version: string;
+    author: string;
+    owned: boolean;
 }
 
 // Lo que devuelve GET /snippets/{id} y PUT /snippets/{id}: lo mismo, más el contenido
@@ -53,8 +55,8 @@ type ApiErrorBody = {
 export class ApiSnippetOperations implements SnippetOperations {
     private readonly http: AxiosInstance
 
-    // La API todavía no devuelve el autor, la extensión ni el estado del linteo (snippet-service#63).
-    // La extensión sale de /languages, que se pide una sola vez por sesión; el resto queda vacío o pendiente
+    // El autor y si soy el dueño vienen de la API. El estado del linteo todavía no, así que queda pendiente.
+    // La extensión sale de /languages, que se pide una sola vez por sesión
     private languages?: Promise<FileType[]>
 
     constructor(
@@ -76,7 +78,7 @@ export class ApiSnippetOperations implements SnippetOperations {
         try {
             const {data} = await this.http.post<SnippetResponse>("/snippets", {name, description, language, version, content})
             // La API no devuelve todo lo que la UI muestra: el contenido y la extensión salen de lo que mandamos
-            return {...createSnippet, ...data, compliance: "pending", author: ""}
+            return {...createSnippet, ...data, compliance: "pending"}
         } catch (error) {
             throw toError(error)
         }
@@ -132,7 +134,7 @@ export class ApiSnippetOperations implements SnippetOperations {
     private async toSnippet(snippet: SnippetResponse, content: string): Promise<Snippet> {
         this.languages ??= this.getFileTypes()
         const extension = (await this.languages.catch(() => [])).find(f => f.language === snippet.language)?.extension ?? ""
-        return {...snippet, content, extension, compliance: "pending", author: ""}
+        return {...snippet, content, extension, compliance: "pending"}
     }
 
     async getUserFriends(name: string = "", page: number = 0, pageSize: number = 10): Promise<PaginatedUsers> {

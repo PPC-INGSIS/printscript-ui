@@ -35,7 +35,10 @@ export type Snippet = CreateSnippet & {
 
 type SnippetStatus = {
   compliance: ComplianceEnum;
+  // Nombre del dueño, para mostrar. No sirve para saber si es mío: dos usuarios pueden llamarse igual
   author: string;
+  // Si el que mira es el dueño. Lo calcula Snippets; sin esto la UI ofrecería borrar o compartir lo compartido
+  owned: boolean;
 }
 export type PaginatedSnippets = Pagination & {
   snippets: Snippet[]
