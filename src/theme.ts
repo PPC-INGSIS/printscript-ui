@@ -20,6 +20,8 @@ export const syntax = {
     string: '#5EEAD4',
     punctuation: '#CBD5E1',
     caret: '#E2E8F0',
+    comment: '#94A3B8',
+    error: '#FDA4AF',
 } as const
 
 export const fonts = {
