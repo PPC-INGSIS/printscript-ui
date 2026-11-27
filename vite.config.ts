@@ -18,6 +18,8 @@ export default defineConfig(({ mode }) => {
         '/api': {
           target: env.API_PROXY_TARGET || 'http://127.0.0.1:8080',
           rewrite: (path) => path.replace(/^\/api/, ''),
+          // La ejecución interactiva es un WebSocket: sin esto, el proxy no deja pasar el Upgrade
+          ws: true,
         },
       },
     },
